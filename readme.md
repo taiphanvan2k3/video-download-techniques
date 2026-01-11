@@ -2,52 +2,52 @@
 
 ## 1. Progressive Download
 
-✅ **Progressive Download** không phải là một giao thức khác mà là cách trình duyệt tải và phát video dần dần bằng **HTTP Range Requests**.
+✅ **Progressive Download** is not a different protocol but rather how browsers progressively download and play video using **HTTP Range Requests**.
 
-### Cách hoạt động:
-- Khi trình duyệt gặp thẻ `<video>`, nó sẽ:
-  - Gửi request có header `Range` để lấy một đoạn byte của file
-  - Server trả lại HTTP 206 Partial Content với phần dữ liệu đó
-  - Trình duyệt buffer và phát ngay trong khi tải tiếp
+### How it works:
+- When the browser encounters a `<video>` tag, it will:
+  - Send requests with `Range` header to get a byte segment of the file
+  - Server returns HTTP 206 Partial Content with that data portion
+  - Browser buffers and plays immediately while continuing to download
 
-👉 **Progressive Download**: fetch theo range để phát ngay mà không cần chờ tải xong toàn bộ file.
+👉 **Progressive Download**: fetch by range to play immediately without waiting for the entire file to download.
 
-### Đặc điểm kỹ thuật:
-- Trình duyệt gửi HTTP Range Requests để tải video từng phần
-- Server (bất kỳ) trả HTTP 206 Partial Content cho những đoạn được yêu cầu
-- Thẻ `<video>` sẽ lấy và phát dần, cho phép seek/tua đến giữa video
+### Technical Features:
+- Browser sends HTTP Range Requests to download video in parts
+- Any server returns HTTP 206 Partial Content for requested segments
+- `<video>` tag progressively loads and plays, allowing seeking to the middle of the video
 
-### Ưu điểm:
-👀 Progressive Download không phải là giao thức mới, mà chỉ là HTTP + range requests để phục vụ video.
-→ Không cần custom server nếu server hiện tại hỗ trợ HTTP Range (Nginx, http-server, Express static, MinIO, S3, CDN đều hỗ trợ).
+### Advantages:
+👀 Progressive Download is not a new protocol, just HTTP + range requests for video serving.
+→ No need for custom server if current server supports HTTP Range (Nginx, http-server, Express static, MinIO, S3, CDN all support it).
 
-📌 Dù là file local hay HTTP, browser vẫn gửi range requests và tự handle progressive download.
+📌 Whether local file or HTTP, browser still sends range requests and handles progressive download automatically.
 
-### Ví dụ triển khai:
+### Implementation Examples:
 
-**Tự custom server để trả về file video theo range request:**
+**Custom server to return video file by range request:**
 ![Custom Server](image/readme/1768151025043.png)
 
-**Thẻ video + local file vẫn hỗ trợ range request:**
+**Video tag + local file still supports range request:**
 ![Local File Support](image/readme/1768151094582.png)
 
-*Progressive Download không bắt buộc "phải custom server" - nó đơn giản là dùng HTTP Range để tải video từng phần. Server có thể là bất kỳ server HTTP nào hỗ trợ Range (static server, S3, MinIO, CDN, Express, Nginx,...)*
+*Progressive Download doesn't require a "custom server" - it's simply using HTTP Range to download video in parts. The server can be any HTTP server that supports Range (static server, S3, MinIO, CDN, Express, Nginx,...)*
 
 ## 2. HLS (HTTP Live Streaming) Download
 
-HLS là giao thức streaming video phổ biến, chia video thành các segment .ts nhỏ và sử dụng playlist .m3u8 để quản lý.
+HLS is a popular video streaming protocol that divides video into small .ts segments and uses .m3u8 playlist files for management.
 
-### Tạo file HLS đơn giản:
+### Create Simple HLS Files:
 
 ```bash
 ffmpeg -i ubuntu_installation.mp4 -c:v libx264 -c:a aac -b:a 128k -f hls -hls_time 10 -hls_list_size 0 hls/ubuntu_installation/master.m3u8
 ```
 
-Lệnh này sẽ tạo ra:
+This command will create:
 - 1 playlist `master.m3u8`
-- Các file segment `.ts` trong thư mục `hls/ubuntu_installation`
+- Segment `.ts` files in the `hls/ubuntu_installation` directory
 
-### Tạo HLS với nhiều chất lượng (Adaptive Bitrate):
+### Create HLS with Multiple Qualities (Adaptive Bitrate):
 
 ```bash
 ffmpeg -i ubuntu_installation.mp4 \
@@ -67,18 +67,18 @@ ffmpeg -i ubuntu_installation.mp4 \
 
 ![HLS Creation](image/readme/1768150661299.png)
 
-### Chạy server HLS:
+### Run HLS Server:
 
 ```bash
 http-server ./hls/ubuntu_installation -p 8080 --cors
 ```
 
-### Sử dụng ở Frontend:
+### Frontend Usage:
 
-Ở phía frontend chỉ cần gọi file `master.m3u8`. Trình duyệt sẽ:
-- Đọc nội dung file master playlist
-- Dựa vào đường truyền internet để chọn chất lượng phù hợp
-- Tự động tải và phát các segment
+In the frontend, simply call the `master.m3u8` file. The browser will:
+- Read the master playlist content
+- Select appropriate quality based on internet connection
+- Automatically download and play segments
 
 ![Master Playlist](image/readme/1768151475672.png)
 
@@ -88,3 +88,8 @@ http-server ./hls/ubuntu_installation -p 8080 --cors
 
 ![HLS Server](image/readme/1768151593151.png)
 
+## Demo Files
+
+- `progressive-download.html` - Examples of progressive download (server-based and local file)
+- `hls-basic.html` - Basic HLS player with automatic quality selection
+- `hls-quality-selector.html` - HLS player with manual quality selection control
