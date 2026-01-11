@@ -1,0 +1,36 @@
+<video id="video" controls width="640"></video>
+<select id="quality"></select>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    const video = document.getElementById("video");
+    const qualitySelect = document.getElementById("quality");
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource("http://localhost:8080/assets/videos/hls/ubuntu_installation/master.m3u8");
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            // Build quality list
+            const qualities = hls.levels.map((level, i) => ({
+                index: i,
+                text: `${level.width}x${level.height} (${Math.round(level.bitrate / 1000)} kbps)`
+            }));
+
+            qualities.forEach(q => {
+                const opt = document.createElement("option");
+                opt.value = q.index;
+                opt.text = q.text;
+                qualitySelect.appendChild(opt);
+            });
+
+            // Listen user choice
+            qualitySelect.addEventListener("change", (e) => {
+                hls.currentLevel = parseInt(e.target.value);
+            });
+
+            video.play();
+        });
+    }
+</script>

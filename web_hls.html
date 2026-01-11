@@ -1,0 +1,11 @@
+<video id="video" controls width="640"></video>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+  const video = document.getElementById("video");
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource("http://localhost:8080/assets/videos/hls/ubuntu_installation/master.m3u8");
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+  }
+</script>

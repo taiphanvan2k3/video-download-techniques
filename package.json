@@ -1,0 +1,10 @@
+{
+  "name": "video-download-techniques",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1",
+    "http-server": "^14.1.1"
+  }
+}
